@@ -42,7 +42,8 @@ class FeatureAttributesControl extends React.Component {
         // set up map click handler that queries for GetFeatureInfo
         let map = this.props.map;
         let containerPoint = e.containerPoint;
-        let containerLatLng = map.layerPointToLatLng(containerPoint);
+        var x = e.latlng.lat;
+        var y = e.latlng.lng;
         let selectedFeatures = [];
         // if event did not originate with a leaflet object, just return
         //if (!this.isLeafletEvent(e)) return;
@@ -64,8 +65,6 @@ class FeatureAttributesControl extends React.Component {
                         if (feature.feature.geometry.type == 'MultiPolygon') {
                             polyPoints = polyPoints[0];
                         }
-                        var x = containerLatLng.lat;
-                        var y = containerLatLng.lng;
                         var inside = false;
                         for (var ii = 0, j = polyPoints.length - 1; ii < polyPoints.length; j = ii++) {
                             var xi = polyPoints[ii].lat, yi = polyPoints[ii].lng;
