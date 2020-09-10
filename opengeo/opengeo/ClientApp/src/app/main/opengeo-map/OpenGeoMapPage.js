@@ -52,7 +52,6 @@ class OpenGeoMapPage extends Component {
 				<OpenGeoMapNavigator />
 				<div id='right-pane' style={{ width: '100%', height: '100%' }} ref={this.rightHandRef} >
 					<OpenGeoMapToolbar />
-
 					<OpenGeoMap height={this.getMapHeight()}/>
 					<FeatureAttributesControl />
 				</div>

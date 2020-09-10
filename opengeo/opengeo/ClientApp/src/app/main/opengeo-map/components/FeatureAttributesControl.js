@@ -3,13 +3,8 @@ import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { makeStyles } from '@material-ui/core/styles';
-import Popper from '@material-ui/core/Popper';
-import Typography from '@material-ui/core/Typography';
-import Fade from '@material-ui/core/Fade';
-import Paper from '@material-ui/core/Paper';
 import MaUTable from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -17,8 +12,6 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import { connect } from 'react-redux';
 import L from 'leaflet';
-
-import axios from 'axios';
 
 const useStyles = makeStyles((theme) => ({
     typography: {
@@ -33,20 +26,16 @@ class FeatureAttributesControl extends React.Component {
         this.state = { selectedFeature: null };
 	}
 
+    // set up map click handler that queries for GetFeatureInfo
+    // search for feature clicked on by user
+	// if found set dispaly state and open dialog
 	handleMapClick = (e) => {
 		if (!this.props.layers) return;
-		//console.log('Clicked Map');
-		// search for feature hit
-		// if found set dispaly state
-		// open dialog 
-        // set up map click handler that queries for GetFeatureInfo
         let map = this.props.map;
-        let containerPoint = e.containerPoint;
+        let containerPoint = e.containerPoint; // mouse x,y point
         var x = e.latlng.lat;
         var y = e.latlng.lng;
         let selectedFeatures = [];
-        // if event did not originate with a leaflet object, just return
-        //if (!this.isLeafletEvent(e)) return;
 
         this.props.layers
             .filter((layer) => { return layer.showing; })
@@ -86,10 +75,10 @@ class FeatureAttributesControl extends React.Component {
             });
 
         // for now, just take the first selectedFeature
+        // TODO:  deal with multiple features selected
         let selectedFeature = selectedFeatures.length ? selectedFeatures[0] : null;
         this.setState({ selectedFeature: selectedFeature });
     };
-
 
     closeDialog = () => {
         this.setState({ selectedFeature: null });
@@ -101,9 +90,8 @@ class FeatureAttributesControl extends React.Component {
     };
 
 	shouldComponentUpdate(nextProps, nextState) {
-		let self = this;
 		if (!this.initialized && nextProps.map) {
-			nextProps.map.on('click', self.handleMapClick, self);
+			nextProps.map.on('click', this.handleMapClick, this);
 		}
 		return true;
 	}
@@ -115,7 +103,6 @@ class FeatureAttributesControl extends React.Component {
     }
 
     render() {
-        
         return (
             this.state.selectedFeature
             ? <Dialog
@@ -134,7 +121,6 @@ class FeatureAttributesControl extends React.Component {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-
                                 {Object.entries(this.state.selectedFeature.feature.properties).map(([name, value]) => {
                                     return (
                                         <TableRow>
@@ -161,7 +147,6 @@ class FeatureAttributesControl extends React.Component {
 		);
     }
 };
-
 
 const mapStateToProps = (state) => {
 	return {
