@@ -38,7 +38,7 @@ namespace opengeo
       });
 
       var connection = Configuration.GetConnectionString("GisDatabase");
-      services.AddDbContext<gisContext>(options => options.UseSqlServer(connection));
+      services.AddDbContext<gisContext>(options => options.UseSqlServer(connection, x => x.UseNetTopologySuite()));
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

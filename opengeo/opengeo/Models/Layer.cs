@@ -18,13 +18,11 @@ namespace opengeo.Models
         public int? LayerNumber { get; set; }
         public string StylesUrl { get; set; }
         public string LegendUrl { get; set; }
-
-        public bool IsWFS { get; set; }
-        public string WFSUrl { get; set; }
+        public bool IsWfs { get; set; }
+        public string WfsUrl { get; set; }
         public string Namespace { get; set; }
-        public string LayerId { get; set; }
+        public string Layer1 { get; set; }
         public string GeometryType { get; set; }
-
 
         public virtual Map Map { get; set; }
     }

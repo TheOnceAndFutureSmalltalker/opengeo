@@ -33,6 +33,8 @@ namespace opengeo.Controllers
     {
       _context = context;
       _temp_storage_path = config.GetValue<string>("TempStoragePath");
+      Gdal.AllRegister();
+      Ogr.RegisterAll();
     }
 
     // GET: api/<ImportController>
@@ -49,105 +51,105 @@ namespace opengeo.Controllers
       return "value";
     }
 
-    //protected int ImportShapefile(string filepathname)
-    //{
-    //  int ret = -1;
-    //  // read file and build object
-    //  var driver = Ogr.GetDriverByName("ESRI Shapefile");
-    //  var datasource = driver.Open(@"C:\Users\Tim\Desktop\Manhattan - Original\ManhattanPoint.shp", 0);
-    //  var layer_index = datasource.GetLayerCount();
+    protected int ImportShapefile(string filepathname)
+    {
+      int ret = -1;
+      // read file and build object
+      var driver = Ogr.GetDriverByName("ESRI Shapefile");
+      var datasource = driver.Open(@"C:\Users\Tim\Desktop\Manhattan - Original\ManhattanPoint.shp", 0);
+      var layer_index = datasource.GetLayerCount();
 
-    //  // for each layer in file/datasource...
-    //  while (layer_index-- > 0)
-    //  {
-    //    var layer = datasource.GetLayerByIndex(layer_index);
-    //    GeojsonLayer geojson_layer = new GeojsonLayer();
-    //    geojson_layer.Crs = "{ \"type\": \"name\", \"properties\": { \"name\": \"urn: ogc: def: crs: OGC: 1.3:CRS84\" } }";
-    //    geojson_layer.Type = "FeatureCollection";
-    //    geojson_layer.Name = layer.GetName();
-    //    geojson_layer.Description = layer.GetName();
+      // for each layer in file/datasource...
+      while (layer_index-- > 0)
+      {
+        var layer = datasource.GetLayerByIndex(layer_index);
+        GeojsonLayer geojson_layer = new GeojsonLayer();
+        geojson_layer.Crs = "{ \"type\": \"name\", \"properties\": { \"name\": \"urn: ogc: def: crs: OGC: 1.3:CRS84\" } }";
+        geojson_layer.Type = "FeatureCollection";
+        geojson_layer.Name = layer.GetName();
+        geojson_layer.Description = layer.GetName();
 
-    //    // for each feature in layer...
-    //    var feature_def = layer.GetLayerDefn();
-    //    var feature = layer.GetNextFeature();
-    //    while (feature != null)
-    //    {
-    //      GeojsonFeature geojson_feature = new GeojsonFeature();
+        // for each feature in layer...
+        var feature_def = layer.GetLayerDefn();
+        var feature = layer.GetNextFeature();
+        while (feature != null)
+        {
+          GeojsonFeature geojson_feature = new GeojsonFeature();
 
-    //      // set Type to default
-    //      geojson_feature.Type = "Feature";
+          // set Type to default
+          geojson_feature.Type = "Feature";
 
-    //      // get OSGeo.OGR.Geometry object form datasource and convert to WKT
-    //      // convert WKT string to NetTopologySuite.Geometries.Geometry
-    //      // and use that to set the Geom property of the object 
-    //      var geom = feature.GetGeometryRef();
-    //      string wkt = null;
-    //      geom.ExportToIsoWkt(out wkt);
-    //      WKTReader wktReader = new WKTReader();
-    //      geojson_feature.Geom = wktReader.Read(wkt);
+          // get OSGeo.OGR.Geometry object form datasource and convert to WKT
+          // convert WKT string to NetTopologySuite.Geometries.Geometry
+          // and use that to set the Geom property of the object 
+          var geom = feature.GetGeometryRef();
+          string wkt = null;
+          geom.ExportToIsoWkt(out wkt);
+          WKTReader wktReader = new WKTReader();
+          geojson_feature.Geom = wktReader.Read(wkt);
 
-    //      // build properties json string and use it to set Properties field
-    //      int next_field_index = feature.GetFieldCount();
-    //      string properties_json = "{";
-    //      // for each field in properties list
-    //      while (next_field_index-- > 0)
-    //      {
-    //        var field_defn = feature_def.GetFieldDefn(next_field_index);
-    //        var field_name = field_defn.GetName();
-    //        var field_type = field_defn.GetFieldType();
-    //        var field_type_name = field_defn.GetFieldTypeName(field_type);
+          // build properties json string and use it to set Properties field
+          int next_field_index = feature.GetFieldCount();
+          string properties_json = "{";
+          // for each field in properties list
+          while (next_field_index-- > 0)
+          {
+            var field_defn = feature_def.GetFieldDefn(next_field_index);
+            var field_name = field_defn.GetName();
+            var field_type = field_defn.GetFieldType();
+            var field_type_name = field_defn.GetFieldTypeName(field_type);
 
-    //        if (field_type == FieldType.OFTInteger)
-    //        {
-    //          int field_val = feature.GetFieldAsInteger(field_name);
-    //          properties_json += "\"" + field_name + "\":\"" + field_val + "\" ";
-    //        }
-    //        if (field_type == FieldType.OFTInteger64)
-    //        {
-    //          long field_val = feature.GetFieldAsInteger64(field_name);
-    //          properties_json += "\"" + field_name + "\":\"" + field_val + "\" ";
-    //        }
-    //        else if (field_type == FieldType.OFTReal)
-    //        {
-    //          double field_val = feature.GetFieldAsDouble(field_name);
-    //          properties_json += "\"" + field_name + "\":\"" + field_val + "\" ";
-    //        }
-    //        else if (field_type == FieldType.OFTString)
-    //        {
-    //          string field_val = feature.GetFieldAsString(field_name);
-    //          properties_json += "\"" + field_name + "\":\"" + field_val + "\" ";
-    //        }
-    //        else
-    //        {
-    //          throw new Exception("Unknown FieldType " + field_type_name);
-    //        }
-    //        Console.WriteLine("  " + field_name + "->" + field_type_name);
-    //      } // end while next_field_index
-    //      properties_json += "}";
-    //      geojson_feature.Properties = properties_json;
+            if (field_type == FieldType.OFTInteger)
+            {
+              int field_val = feature.GetFieldAsInteger(field_name);
+              properties_json += "\"" + field_name + "\":\"" + field_val + "\" ";
+            }
+            if (field_type == FieldType.OFTInteger64)
+            {
+              long field_val = feature.GetFieldAsInteger64(field_name);
+              properties_json += "\"" + field_name + "\":\"" + field_val + "\" ";
+            }
+            else if (field_type == FieldType.OFTReal)
+            {
+              double field_val = feature.GetFieldAsDouble(field_name);
+              properties_json += "\"" + field_name + "\":\"" + field_val + "\" ";
+            }
+            else if (field_type == FieldType.OFTString)
+            {
+              string field_val = feature.GetFieldAsString(field_name);
+              properties_json += "\"" + field_name + "\":\"" + field_val + "\" ";
+            }
+            else
+            {
+              throw new Exception("Unknown FieldType " + field_type_name);
+            }
+            Console.WriteLine("  " + field_name + "->" + field_type_name);
+          } // end while next_field_index
+          properties_json += "}";
+          geojson_feature.Properties = properties_json;
 
-    //      // add geojson_feature to geojson_layer
-    //      geojson_layer.GeojsonFeature.Add(geojson_feature);
+          // add geojson_feature to geojson_layer
+          geojson_layer.GeojsonFeature.Add(geojson_feature);
 
-    //      // get next feature in layer
-    //      feature = layer.GetNextFeature();
-    //    } // end while feature
+          // get next feature in layer
+          feature = layer.GetNextFeature();
+        } // end while feature
 
-    //    // put layer in database
-    //    using (gisContext dbContext = new gisContext())
-    //    {
-    //      dbContext.GeojsonLayer.Add(geojson_layer);
-    //      dbContext.SaveChanges();
-    //      ret = geojson_layer.Id;
-    //    }
+        // put layer in database
+        using (gisContext dbContext = new gisContext())
+        {
+          dbContext.GeojsonLayer.Add(geojson_layer);
+          dbContext.SaveChanges();
+          ret = geojson_layer.Id;
+        }
 
-    //    // standard allows for more than one layer, be we are only going to process one for now
-    //    break;
-    //  } // end while layer loop
-    //  datasource.Dispose();  // perhaps put on using statement
-    //  driver.Dispose();
-    //  return ret;
-    //}
+        // standard allows for more than one layer, be we are only going to process one for now
+        break;
+      } // end while layer loop
+      datasource.Dispose();  // perhaps put on using statement
+      driver.Dispose();
+      return ret;
+    }
 
     [HttpPost]
     public async Task<IActionResult> Shapefile(IFormFile file)
@@ -164,7 +166,7 @@ namespace opengeo.Controllers
           await file.CopyToAsync(stream);
         }
       }
-      int id = -1; // ImportShapefile(filePath);
+      int id = ImportShapefile(filePath);
       System.IO.File.Delete(filePath);
       return Ok(id); ;
     }
