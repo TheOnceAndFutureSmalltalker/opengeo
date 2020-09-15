@@ -5,6 +5,11 @@ namespace opengeo.Models
 {
     public partial class Layer
     {
+        public Layer()
+        {
+            LayerStyles = new HashSet<LayerStyles>();
+        }
+
         public int Id { get; set; }
         public string Name { get; set; }
         public string Url { get; set; }
@@ -25,5 +30,6 @@ namespace opengeo.Models
         public string GeometryType { get; set; }
 
         public virtual Map Map { get; set; }
+        public virtual ICollection<LayerStyles> LayerStyles { get; set; }
     }
 }

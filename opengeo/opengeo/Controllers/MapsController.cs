@@ -32,7 +32,7 @@ namespace opengeo.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Map>> GetMap(int id)
         {
-            var map = await _context.Map.Include("Layer").Include("Basemap").FirstOrDefaultAsync(m => m.Id == id);
+            var map = await _context.Map.Include("Layer.LayerStyles").Include("Basemap").FirstOrDefaultAsync(m => m.Id == id);
 
             if (map == null)
             {

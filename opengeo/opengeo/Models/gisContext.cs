@@ -234,12 +234,25 @@ namespace opengeo.Models
 
                 entity.Property(e => e.ApplyRule).HasColumnName("applyRule");
 
+                entity.Property(e => e.Color)
+                    .HasColumnName("color")
+                    .HasMaxLength(12);
+
+                entity.Property(e => e.IconUrl)
+                    .HasColumnName("iconUrl")
+                    .HasMaxLength(200);
+
                 entity.Property(e => e.LayerId).HasColumnName("layer_id");
 
-                entity.Property(e => e.Color).HasColumnName("color");
-              entity.Property(e => e.Weight).HasColumnName("weight");
-              entity.Property(e => e.Opacity).HasColumnName("opacity");
-              entity.Property(e => e.IconUrl).HasColumnName("iconUrl");
+                entity.Property(e => e.Opacity).HasColumnName("opacity");
+
+                entity.Property(e => e.Weight).HasColumnName("weight");
+
+                entity.HasOne(d => d.Layer)
+                    .WithMany(p => p.LayerStyles)
+                    .HasForeignKey(d => d.LayerId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_layer_styles_layer");
             });
 
             modelBuilder.Entity<Map>(entity =>

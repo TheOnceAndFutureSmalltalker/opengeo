@@ -13,6 +13,14 @@ import { connect } from 'react-redux';
 import { selectedLayerForEditing, updatedLayers } from '../actions'
 
 
+function getStyles(features, styles) {
+	if (styles.length > 0) {
+		return styles[0];
+	} else {
+		const styles = { color: 'blue', weight: 2 };
+		return styles;
+	}
+}
 
 class MapLayersList extends Component {
 	constructor(props) {
@@ -42,17 +50,19 @@ class MapLayersList extends Component {
 	};
 
 
+
+
 	shouldComponentUpdate(nextProps, nextState) {
 		if (!this.initialized && nextProps.layers && nextProps.map) {
 			let layers = [];
 			nextProps.layers.forEach(layer => {
-				const style = { color: 'blue', weight: 2 };
+				
 				let options = {
 					url: layer.url,
 					//pointToLayer: this.pointToLayer,
 					primaryKeyField: 'fid',
 					crs: L.CRS.EPSG4326,
-					style: style,
+					style: function (features) { return getStyles(features, layer.layerStyles);},
 					showToolbar: false
 				};
 				layer.leaflet = new L.REST(options);
