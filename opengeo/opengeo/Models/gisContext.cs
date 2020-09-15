@@ -20,8 +20,8 @@ namespace opengeo.Models
         public virtual DbSet<GeojsonLayer> GeojsonLayer { get; set; }
         public virtual DbSet<Image> Image { get; set; }
         public virtual DbSet<Layer> Layer { get; set; }
+        public virtual DbSet<LayerStyles> LayerStyles { get; set; }
         public virtual DbSet<Map> Map { get; set; }
-        
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -224,6 +224,22 @@ namespace opengeo.Models
                     .HasForeignKey(d => d.MapId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_layer_map");
+            });
+
+            modelBuilder.Entity<LayerStyles>(entity =>
+            {
+                entity.ToTable("layer_styles");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.ApplyRule).HasColumnName("applyRule");
+
+                entity.Property(e => e.LayerId).HasColumnName("layer_id");
+
+                entity.Property(e => e.Color).HasColumnName("color");
+              entity.Property(e => e.Weight).HasColumnName("weight");
+              entity.Property(e => e.Opacity).HasColumnName("opacity");
+              entity.Property(e => e.IconUrl).HasColumnName("iconUrl");
             });
 
             modelBuilder.Entity<Map>(entity =>
