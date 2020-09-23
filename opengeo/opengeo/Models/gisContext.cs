@@ -23,6 +23,8 @@ namespace opengeo.Models
         public virtual DbSet<LayerStyles> LayerStyles { get; set; }
         public virtual DbSet<Map> Map { get; set; }
 
+        public virtual DbSet<User> User { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -96,6 +98,25 @@ namespace opengeo.Models
                     .HasForeignKey(d => d.GeojsonLayerId)
                     .HasConstraintName("FK_geojson_feature_geojson_layer");
             });
+
+      modelBuilder.Entity<User>(entity => {
+        entity.ToTable("user");
+        entity.Property(e => e.Id).HasColumnName("id");
+        entity.Property(e => e.FirstName)
+                    .HasColumnName("first_name")
+                    .HasMaxLength(30);
+        entity.Property(e => e.LastName)
+                    .HasColumnName("last_name")
+                    .HasMaxLength(30);
+        entity.Property(e => e.Username)
+                    .HasColumnName("username")
+                    .HasMaxLength(30);
+        entity.Property(e => e.FirstName)
+                    .HasColumnName("first_name")
+                    .HasMaxLength(30);
+      }
+      
+      );
 
             modelBuilder.Entity<GeojsonLayer>(entity =>
             {

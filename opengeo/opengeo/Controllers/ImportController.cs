@@ -11,6 +11,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using System.IO;
+using System.IO.Compression;
 using System.Text;
 
 using OSGeo.GDAL;
@@ -51,12 +52,12 @@ namespace opengeo.Controllers
       return "value";
     }
 
-    protected int ImportShapefile(string filepathname)
+    protected int Import(string drivername, string filepathname)
     {
       int ret = -1;
       // read file and build object
-      var driver = Ogr.GetDriverByName("ESRI Shapefile");
-      var datasource = driver.Open(@"C:\Users\Tim\Desktop\Manhattan - Original\ManhattanPoint.shp", 0);
+      var driver = Ogr.GetDriverByName(drivername);
+      var datasource = driver.Open(filepathname, 0);
       var layer_index = datasource.GetLayerCount();
 
       // for each layer in file/datasource...
@@ -151,81 +152,75 @@ namespace opengeo.Controllers
       return ret;
     }
 
+
+    //"ESRI Shapefile"
     [HttpPost]
     public async Task<IActionResult> Shapefile(IFormFile file)
     {
+      // save zip file to temp storage and unzip
       string filePath = null;
       if (file.Length > 0)
       {
         filePath = Path.Combine(_temp_storage_path, file.FileName);
-        //if(filePath != null) return Ok();
+        using (var stream = System.IO.File.Create(filePath))
+        {
+          await file.CopyToAsync(stream);
+        }
+        ZipFile.ExtractToDirectory(filePath, _temp_storage_path);
+      }
+      // TODO: need directory within zip
+      // import file as ESRI shapefile into database
+      filePath = filePath.Replace(".zip", ".shp");
+      int id = Import("ESRI Shapefile", filePath);
+      // remove file from temp storage
+      System.IO.File.Delete(filePath);
+      return Ok(id); 
+    }
 
-        // save file
+    /// <summary>
+    /// Import geoJSON file into database
+    /// </summary>
+    /// <param name="file"></param>
+    /// <returns></returns>
+    [HttpPost]
+    public async Task<ActionResult> GeoJSON(IFormFile file)
+    {
+      // save file to temp storage
+      string filePath = null;
+      if (file.Length > 0)
+      {
+        filePath = Path.Combine(_temp_storage_path, file.FileName);
         using (var stream = System.IO.File.Create(filePath))
         {
           await file.CopyToAsync(stream);
         }
       }
-      int id = ImportShapefile(filePath);
+      // import file as geoJSON into database
+      int id = Import("GeoJSON", filePath);
+      // remove file from temp storage
       System.IO.File.Delete(filePath);
-      return Ok(id); ;
+      return Ok(id);
     }
 
     [HttpPost]
-    public async Task<ActionResult> GeoJSON()
+    public async Task<ActionResult> KML(IFormFile file)
     {
-      string json = "";
-      using (StreamReader reader = new StreamReader(Request.Body, Encoding.UTF8))
+      // save file to temp storage
+      string filePath = null;
+      if (file.Length > 0)
       {
-        json = await reader.ReadToEndAsync();
+        filePath = Path.Combine(_temp_storage_path, file.FileName);
+        using (var stream = System.IO.File.Create(filePath))
+        {
+          await file.CopyToAsync(stream);
+        }
       }
-
-      System.Data.Common.DbConnection conn = _context.Database.GetDbConnection();
-
-      SqlCommand cmd = new SqlCommand();
-      cmd.CommandType = System.Data.CommandType.StoredProcedure;
-      cmd.CommandText = "dbo.import_geojson";
-      cmd.Connection = (SqlConnection)conn;
-      cmd.Parameters.AddWithValue("@json", json);
-      cmd.Parameters.Add("@layer_id", System.Data.SqlDbType.Int);
-      cmd.Parameters["@layer_id"].Direction = System.Data.ParameterDirection.Output;
-
-      int layer_id;
-      try
-      {
-        conn.Open();
-        cmd.ExecuteNonQuery();
-        layer_id = Convert.ToInt32(cmd.Parameters["@layer_id"].Value);
-      }
-      catch (Exception ex)
-      {
-        throw ex;
-      }
-      finally
-      {
-        conn.Close();
-      }
-
-      return Content(layer_id.ToString());  // id of new geojson_layer ID
+      // import file as KML into database
+      int id = Import("KML", filePath);
+      // remove file from temp storage
+      System.IO.File.Delete(filePath);
+      return Ok(id);
     }
 
-    // POST api/<ImportController>
-    [HttpPost]
-    public void Post()
-    {
-      int i = 5;
-    }
-
-    // PUT api/<ImportController>/5
-    [HttpPut("{id}")]
-    public void Put(int id, [FromBody] string value)
-    {
-    }
-
-    // DELETE api/<ImportController>/5
-    [HttpDelete("{id}")]
-    public void Delete(int id)
-    {
-    }
   }
 }

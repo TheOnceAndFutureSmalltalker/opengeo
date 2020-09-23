@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using opengeo.Models;
+using opengeo.Middleware;
 
 
 
@@ -39,6 +40,12 @@ namespace opengeo
 
       var connection = Configuration.GetConnectionString("GisDatabase");
       services.AddDbContext<gisContext>(options => options.UseSqlServer(connection, x => x.UseNetTopologySuite()));
+
+      // configure strongly typed settings object
+      services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+
+      // configure DI for application services
+      services.AddScoped<IUserService, UserService>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -60,6 +67,9 @@ namespace opengeo
       app.UseSpaStaticFiles();
 
       app.UseRouting();
+
+      // custom jwt auth middleware
+      app.UseMiddleware<JwtMiddleware>();
 
       app.UseEndpoints(endpoints =>
       {
