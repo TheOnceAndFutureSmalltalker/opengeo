@@ -2,6 +2,10 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import FuseUtils from '@fuse/utils';
 
+import LoginConfig from 'app/main/login/LoginConfig';
+import LogoutConfig from 'app/main/logout/LogoutConfig';
+import RegisterConfig from 'app/main/register/RegisterConfig';
+
 import ForgotPassword2PageConfig from 'app/main/pages/auth/forgot-password-2/ForgotPassword2PageConfig';
 import ForgotPasswordPageConfig from 'app/main/pages//auth/forgot-password/ForgotPasswordPageConfig';
 import LockPageConfig from 'app/main/pages/auth/lock/LockPageConfig';
@@ -22,6 +26,11 @@ import ExampleConfig from 'app/main/example/ExampleConfig';
 import OpenGeoMapPageConfig from 'app/main/opengeo-map/OpenGeoMapPageConfig';
 
 const routeConfigs = [
+
+	LoginConfig,
+	LogoutConfig,
+	RegisterConfig,
+
 	ForgotPassword2PageConfig,
 	ForgotPasswordPageConfig,
 	LockPageConfig,
@@ -45,10 +54,13 @@ const routeConfigs = [
 ];
 
 const routes = [
-	...FuseUtils.generateRoutesFromConfigs(routeConfigs),
+	...FuseUtils.generateRoutesFromConfigs(routeConfigs, ['admin', 'staff', 'user']),
 	{
 		path: '/',
 		component: () => <Redirect to="/example" />
+	},
+	{
+		component: () => <Redirect to="/pages/errors/error-404" />
 	}
 ];
 

@@ -2,22 +2,30 @@
 
 namespace opengeo.Models
 {
+  public class AuthenticatedUser
+  {
+    public AuthenticatedUser(User user)
+    {
+      id = user.Id;
+      firstname = user.FirstName;
+      lastname = user.LastName;
+      username = user.Username;
+    }
+    public int id { get; set; }
+    public string firstname { get; set; }
+    public string lastname { get; set; }
+    public string username { get; set; }
+  }
   public class AuthenticateResponse
   {
-    public int Id { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string Username { get; set; }
-    public string Token { get; set; }
+    public AuthenticatedUser user { get; set; }
+    public string access_token { get; set; }
 
 
-    public AuthenticateResponse(User user, string token)
+    public AuthenticateResponse(User user, string access_token)
     {
-      Id = user.Id;
-      FirstName = user.FirstName;
-      LastName = user.LastName;
-      Username = user.Username;
-      Token = token;
+      this.user = new AuthenticatedUser(user);
+      this.access_token = access_token;
     }
   }
 }

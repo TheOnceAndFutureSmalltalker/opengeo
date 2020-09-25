@@ -6,10 +6,10 @@ import * as UserActions from './user.actions';
 export const LOGIN_ERROR = 'LOGIN_ERROR';
 export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
 
-export function submitLogin({ email, password }) {
+export function submitLogin({ username, password }) {
 	return dispatch =>
 		jwtService
-			.signInWithEmailAndPassword(email, password)
+			.signInWithEmailAndPassword(username, password)
 			.then(user => {
 				dispatch(UserActions.setUserData(user));
 

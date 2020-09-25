@@ -45,16 +45,16 @@ namespace opengeo.Middleware
       if (user == null) return null;
 
       // authentication successful so generate jwt token
-      var token = generateJwtToken(user);
+      var access_token = generateJwtToken(user);
 
-      return new AuthenticateResponse(user, token);
+      return new AuthenticateResponse(user, access_token);
     }
 
     public AuthenticateResponse Refresh(User user)
     {
-      var token = generateJwtToken(user);
+      var access_token = generateJwtToken(user);
 
-      return new AuthenticateResponse(user, token);
+      return new AuthenticateResponse(user, access_token);
     }
 
     public IEnumerable<User> GetAll()
