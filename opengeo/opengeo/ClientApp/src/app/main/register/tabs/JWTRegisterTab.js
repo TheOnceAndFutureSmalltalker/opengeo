@@ -47,6 +47,29 @@ function JWTRegisterTab(props) {
 				<TextFieldFormsy
 					className="mb-16"
 					type="text"
+					name="username"
+					label="Username"
+					validations={{
+						minLength: 4
+					}}
+					validationErrors={{
+						minLength: 'Min character length is 4'
+					}}
+					InputProps={{
+						endAdornment: (
+							<InputAdornment position="end">
+								<Icon className="text-20" color="action">
+									person
+								</Icon>
+							</InputAdornment>
+						)
+					}}
+					variant="outlined"
+					required
+				/>
+				<TextFieldFormsy
+					className="mb-16"
+					type="text"
 					name="displayName"
 					label="Display name"
 					validations={{

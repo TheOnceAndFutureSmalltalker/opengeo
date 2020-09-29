@@ -13,7 +13,8 @@ namespace opengeo.Middleware
   public interface IUserService
   {
     AuthenticateResponse Authenticate(AuthenticateRequest model);
-    AuthenticateResponse Refresh(User user);
+    AuthenticateResponse AuthenticateWithToken(string token);
+    AuthenticateResponse RegisterUser(RegisterRequest model);
     IEnumerable<User> GetAll();
     User GetById(int id);
   }
@@ -23,7 +24,7 @@ namespace opengeo.Middleware
     // users hardcoded for simplicity, store in a db with hashed passwords in production applications
     private List<User> _users = new List<User>
         {
-            new User { Id = 1, FirstName = "Test", LastName = "User", Username = "test", Password = "test" }
+            new User { Id = 1, DisplayName = "Test", photoURL = "User", Username = "test", Password = "test" }
         };
 
     private readonly AppSettings _appSettings;
@@ -45,17 +46,11 @@ namespace opengeo.Middleware
       if (user == null) return null;
 
       // authentication successful so generate jwt token
-      var access_token = generateJwtToken(user);
+      var token = generateJwtToken(user);
 
-      return new AuthenticateResponse(user, access_token);
+      return new AuthenticateResponse(user, token);
     }
 
-    public AuthenticateResponse Refresh(User user)
-    {
-      var access_token = generateJwtToken(user);
-
-      return new AuthenticateResponse(user, access_token);
-    }
 
     public IEnumerable<User> GetAll()
     {
@@ -66,6 +61,46 @@ namespace opengeo.Middleware
     {
       return _context.User.FirstOrDefault(x => x.Id == id);
     }
+
+    public AuthenticateResponse AuthenticateWithToken(string token)
+    {
+      var tokenHandler = new JwtSecurityTokenHandler();
+      var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+      tokenHandler.ValidateToken(token, new TokenValidationParameters
+      {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        // set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
+        ClockSkew = TimeSpan.Zero
+      }, out SecurityToken validatedToken);
+
+      var jwtToken = (JwtSecurityToken)validatedToken;
+      var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
+
+      User user = GetById(userId);
+      return new AuthenticateResponse(user, token);
+    }
+
+    public AuthenticateResponse RegisterUser(RegisterRequest model)
+    {
+      // verify we have username, password, email, displayName
+      // check pre-existing email/username
+      User user = new User()
+      {
+        Username = model.username,
+        Password = model.password,
+        Email = model.email,
+        DisplayName = model.displayName
+      };
+      _context.User.Add(user);
+      _context.SaveChanges();
+
+      string token = generateJwtToken(user);
+      return new AuthenticateResponse(user, token);
+    }
+
 
     // helper methods
 

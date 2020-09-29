@@ -102,17 +102,17 @@ namespace opengeo.Models
       modelBuilder.Entity<User>(entity => {
         entity.ToTable("user");
         entity.Property(e => e.Id).HasColumnName("id");
-        entity.Property(e => e.FirstName)
-                    .HasColumnName("first_name")
+        entity.Property(e => e.DisplayName)
+                    .HasColumnName("display_name")
                     .HasMaxLength(30);
-        entity.Property(e => e.LastName)
-                    .HasColumnName("last_name")
+        entity.Property(e => e.Email)
+                    .HasColumnName("email")
                     .HasMaxLength(30);
         entity.Property(e => e.Username)
                     .HasColumnName("username")
                     .HasMaxLength(30);
-        entity.Property(e => e.FirstName)
-                    .HasColumnName("first_name")
+        entity.Property(e => e.photoURL)
+                    .HasColumnName("photo_url")
                     .HasMaxLength(30);
       }
       

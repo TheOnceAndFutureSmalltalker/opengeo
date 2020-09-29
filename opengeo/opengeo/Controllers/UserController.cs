@@ -21,6 +21,7 @@ namespace opengeo.Controllers
       _userService = userService;
     }
 
+    // log in with username and password
     [HttpPost]
     public IActionResult Authenticate(AuthenticateRequest model)
     {
@@ -32,14 +33,25 @@ namespace opengeo.Controllers
       return Ok(response);
     }
 
-    [Authorize]
-    [HttpGet]
-    public IActionResult Refresh()
+    // log in with token
+    [HttpPost]
+    public IActionResult AuthenticateWithToken(AuthenticateTokenRequest model)
     {
-      User user = (User)HttpContext.Items["User"];
-      var response = _userService.Refresh(user);
+      string token = model.access_token;
+
+      var response = _userService.AuthenticateWithToken(token);
       if (response == null)
-        return BadRequest(new { message = "Username or password is incorrect" });
+        return BadRequest(new { message = "Bad credentials." });
+
+      return Ok(response);
+    }
+
+    [HttpPost]
+    public IActionResult Register(RegisterRequest model)
+    {
+      var response = _userService.RegisterUser(model);
+      if (response == null)
+        return BadRequest(new { message = "Bad credentials." });
 
       return Ok(response);
     }
